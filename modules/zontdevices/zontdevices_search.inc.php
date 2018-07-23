@@ -16,7 +16,7 @@
    $session->data['zontdevices_qry']=$qry;
   }
   if (!$qry) $qry="1";
-  $sortby_zontdevices="ADDRESS";
+  $sortby_zontdevices="TITLE";
   $out['SORTBY']=$sortby_zontdevices;
   // SEARCH RESULTS
   $res=SQLSelect("SELECT * FROM zontdevices WHERE $qry ORDER BY ".$sortby_zontdevices);
