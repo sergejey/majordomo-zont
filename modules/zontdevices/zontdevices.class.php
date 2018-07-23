@@ -417,6 +417,10 @@ class zontdevices extends module
 
     function refreshDevices() {
         $data=$this->requestZontAPI('/api/devices');
+        if ($_GET['raw']) {
+            dprint($data);
+        }
+
         if (is_array($data['devices'])) {
             $total = count($data['devices']);
             for($i=0;$i<$total;$i++) {
