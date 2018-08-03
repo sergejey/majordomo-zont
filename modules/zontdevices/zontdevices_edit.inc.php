@@ -9,7 +9,7 @@
   $rec=SQLSelectOne("SELECT * FROM $table_name WHERE ID='$id'");
 
   if ($this->tab=='data' && gr('refresh')) {
-      $this->refreshDevice($rec['ID']);
+      $this->refreshDevices();
       $this->redirect("?view_mode=".$this->view_mode."&id=".$rec['ID']."&tab=".$this->tab);
   }
 
@@ -84,11 +84,11 @@
        if ($properties[$i]['LINKED_OBJECT'] && $properties[$i]['LINKED_PROPERTY']) {
            addLinkedProperty($properties[$i]['LINKED_OBJECT'], $properties[$i]['LINKED_PROPERTY'], $this->name);
        }
-       $command = $this->device_types[$rec['DEVICE_TYPE']]['commands'][$properties[$i]['TITLE']];
+       $command = $this->device_types[$rec['DEVICE_TYPE']]['commands'][$properties[$i]['SYSTEM']];
        if ($properties[$i]['VALUE_TYPE']=='temperature') {
            $properties[$i]['SDEVICE_TYPE']='sensor_temp';
        }
-       if ($command['fwrite']) {
+       if ($command['CANSET']) {
            $properties[$i]['CANSET']=1;
        }
 

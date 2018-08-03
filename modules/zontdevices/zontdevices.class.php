@@ -315,6 +315,80 @@ class zontdevices extends module
             $command['VALUE']=$data['balance']['value'];
             $commands[]=$command;
         }
+
+        if ($has['has_gtw_reports']) {
+            if (isset($data['gtw_t_air_int_sensor'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_air_int_sensor';
+                $command['TITLE']='Int. air sensor, T';
+                $command['VALUE']=$data['gtw_t_air_int_sensor'];
+                $command['VALUE_TYPE']='temperature';
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_t_air_ext_sensor'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_air_ext_sensor';
+                $command['TITLE']='Ext. air sensor, T';
+                $command['VALUE']=$data['gtw_t_air_ext_sensor'];
+                $command['VALUE_TYPE']='temperature';
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_t_water_sensor'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_water_sensor';
+                $command['TITLE']='Water sensor, T';
+                $command['VALUE']=$data['gtw_t_water_sensor'];
+                $command['VALUE_TYPE']='temperature';
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_t_air_set_disp'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_air_set_disp';
+                $command['TITLE']='Auto Air target, T';
+                $command['VALUE']=$data['gtw_t_air_set_disp'];
+                $command['VALUE_TYPE']='temperature';
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_t_water_set_disp'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_water_set_disp';
+                $command['TITLE']='Auto Water target, T';
+                $command['VALUE']=$data['gtw_t_water_set_disp'];
+                $command['VALUE_TYPE']='temperature';
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_p_water'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_p_water';
+                $command['TITLE']='Water pressure';
+                $command['VALUE']=$data['gtw_p_water'];
+                $commands[]=$command;
+            }
+
+            if (isset($data['gtw_t_water'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_water';
+                $command['TITLE']='Water target';
+                $command['VALUE']=$data['gtw_t_water'];
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_t_air'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_t_air';
+                $command['TITLE']='Air target';
+                $command['VALUE']=$data['gtw_t_air'];
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_mode'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_mode';
+                $command['TITLE']='Mode';
+                $command['VALUE']=$data['gtw_mode']['current'];
+                $commands[]=$command;
+            }
+
+        }
+
         if ($has['has_multiple_thermometers'] && is_array($data['thermometers'])) {
             foreach($data['thermometers'] as $term) {
                 $command=array();
@@ -431,10 +505,11 @@ class zontdevices extends module
 
     function writeDeviceCommand($device_rec, $command_rec, $value)
     {
-        if ($command_rec['SYSTEM']=='thermostat_ext_mode') {
+        $command = $this->device_types[$device_rec['DEVICE_TYPE']]['commands'][$command_rec['SYSTEM']];
+        if ($command['CANSET']) {
             $data=array();
             $data['device_id']=$device_rec['SERIAL_ID'];
-            $data['thermostat_ext_mode']=$value;
+            $data[$command_rec['SYSTEM']]=$value;
             $this->requestZontAPI('/api/update_device',$data);
         }
     }

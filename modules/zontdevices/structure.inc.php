@@ -5,8 +5,22 @@ $this->device_types = array(
         'TITLE' => 'ZONT H-1/H-1V',
         'manual' => '',
         'commands' =>
-            array()
+            array(
+                'thermostat_ext_mode'=>array(
+                    'CANSET'=>1,
+                )
+            )
     ),
+    'GTW-100' => array(
+        'TITLE' => 'ZONT EXPERT',
+        'manual' => '',
+        'commands' =>
+            array(
+                'gtw_mode'=>array(
+                    'CANSET'=>1,
+                ),
+            )
+    )
 );
 
 foreach($this->device_types as $k=>$v) {
