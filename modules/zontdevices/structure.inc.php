@@ -18,6 +18,7 @@ $this->device_types = array(
             array(
                 'gtw_mode'=>array(
                     'CANSET'=>1,
+                    'COMMENTS'=>'off — Выключен, water — Водонагрев, floor — Теплый пол, air — Комнатный, week — Недельный, party — Вечеринка, econom — Эконом, workday — Рабочий день, weekend — Выходной день',
                 ),
             )
     )

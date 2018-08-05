@@ -91,6 +91,9 @@
        if ($command['CANSET']) {
            $properties[$i]['CANSET']=1;
        }
+       if (!$properties[$i]['COMMENTS'] && $command['COMMENTS']) {
+           $properties[$i]['COMMENTS']=$command['COMMENTS'];
+       }
 
    }
    $out['PROPERTIES']=$properties;

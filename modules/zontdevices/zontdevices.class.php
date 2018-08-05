@@ -494,12 +494,14 @@ class zontdevices extends module
         if ($_GET['raw']) {
             dprint($data);
         }
-
         if (is_array($data['devices'])) {
+            //echo "Data: ".json_encode($data)."\n";
             $total = count($data['devices']);
             for($i=0;$i<$total;$i++) {
                 $this->processDeviceData($data['devices'][$i]);
             }
+        } else {
+            //echo "No data received: ".$data."\n";
         }
     }
 
@@ -509,8 +511,15 @@ class zontdevices extends module
         if ($command['CANSET']) {
             $data=array();
             $data['device_id']=$device_rec['SERIAL_ID'];
-            $data[$command_rec['SYSTEM']]=$value;
-            $this->requestZontAPI('/api/update_device',$data);
+            if ($command_rec['SYSTEM']=='gtw_mode') {
+                $data[$command_rec['SYSTEM']]['current']=$value;
+                $data[$command_rec['SYSTEM']]['old']=$value;
+            } else {
+                $data[$command_rec['SYSTEM']]=$value;
+            }
+            //dprint($data);
+            $result = $this->requestZontAPI('/api/update_device',$data);
+            //dprint($result);
         }
     }
 
@@ -521,8 +530,10 @@ class zontdevices extends module
         $latest_iteration=(int)$this->cycle_time;
         if ((time()-$latest_iteration)>$this->config['API_POLL']) {
             $this->cycle_time=time();
-            echo date('H:i:s')." Refreshing devices\n";
+            //echo date('H:i:s')." Refreshing devices\n";
             $this->refreshDevices();
+        } else {
+            //echo date('H:i:s')." Skipping iteration (".(time()-$latest_iteration)." < ".$this->config['API_POLL'].")\n";
         }
     }
 
