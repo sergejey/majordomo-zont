@@ -296,6 +296,7 @@ class zontdevices extends module
 
 
     function processDeviceData($data) {
+        //dprint($data);
         $device_rec=SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='".DBSafe($data['id'])."'");
         if (!$device_rec['ID']) {
             $device_rec['SERIAL_ID']=$data['id'];
@@ -384,6 +385,13 @@ class zontdevices extends module
                 $command['SYSTEM']='gtw_mode';
                 $command['TITLE']='Mode';
                 $command['VALUE']=$data['gtw_mode']['current'];
+                $commands[]=$command;
+            }
+            if (isset($data['gtw_gvs'])) {
+                $command=array();
+                $command['SYSTEM']='gtw_gvs';
+                $command['TITLE']='Mode GVS';
+                $command['VALUE']=$data['gtw_gvs'];
                 $commands[]=$command;
             }
 

@@ -12,7 +12,8 @@ $this->device_types = array(
                 'thermostat_mode'=>array(
                     'CANSET'=>1,
                     'COMMENTS'=>'idle,comfort,econom,schedule'
-                )
+                ),
+
             )
     ),
     'GTW-100' => array(
@@ -24,6 +25,12 @@ $this->device_types = array(
                     'CANSET'=>1,
                     'COMMENTS'=>'off — Выключен, water — Водонагрев, floor — Теплый пол, air — Комнатный, week — Недельный, party — Вечеринка, econom — Эконом, workday — Рабочий день, weekend — Выходной день',
                 ),
+                /*
+                'gtw_gvs'=>array(
+                    'CANSET'=>1,
+                    'COMMENTS'=>'1/(empty)'
+                )
+                */
             )
     )
 );
