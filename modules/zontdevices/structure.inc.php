@@ -8,6 +8,10 @@ $this->device_types = array(
             array(
                 'thermostat_ext_mode'=>array(
                     'CANSET'=>1,
+                ),
+                'thermostat_mode'=>array(
+                    'CANSET'=>1,
+                    'COMMENTS'=>'idle,comfort,econom,schedule'
                 )
             )
     ),
