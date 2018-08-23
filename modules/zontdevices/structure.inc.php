@@ -16,6 +16,21 @@ $this->device_types = array(
 
             )
     ),
+    'T102' => array(
+        'TITLE' => 'ZONT H-2',
+        'manual' => '',
+        'commands' =>
+            array(
+                'thermostat_ext_mode'=>array(
+                    'CANSET'=>1,
+                ),
+                'thermostat_mode'=>array(
+                    'CANSET'=>1,
+                    'COMMENTS'=>'idle,comfort,econom,schedule'
+                ),
+
+            )
+    ),
     'GTW-100' => array(
         'TITLE' => 'ZONT EXPERT',
         'manual' => '',
