@@ -47,7 +47,21 @@ $this->device_types = array(
                 )
                 */
             )
-    )
+    ),
+    'H2000' => array (
+        'TITLE'=> 'ZONT H-2000',
+        'manual' => '',
+        'commands' =>array(
+                'thermostat_ext_mode'=>array(
+                    'CANSET'=>1,
+                ),
+                'thermostat_mode'=>array(
+                    'CANSET'=>1,
+                    'COMMENTS'=>'idle,comfort,econom,schedule'
+                ),
+
+            )
+    ),
 );
 
 foreach($this->device_types as $k=>$v) {
