@@ -295,6 +295,48 @@ class zontdevices extends module
     }
 
 
+    function processDeviceDataResponse($data) {
+        $device_rec=SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='".DBSafe($data['device_id'])."'");
+        if (!$device_rec['ID']) {
+            $device_rec['SERIAL_ID']=$data['id'];
+            $device_rec['DEVICE_TYPE']=$data['device_type']['code'];
+            $device_rec['TITLE']=$data['device_type']['name'];
+            $device_rec['ID']=SQLInsert('zontdevices',$device_rec);
+        }
+        $commands=array();
+        if (isset($data['thermostat_work']['power'][0][1])) {
+            $command=array();
+            $command['SYSTEM']='power';
+            $command['VALUE']=$data['thermostat_work']['power'][0][1];
+            $commands[]=$command;
+        }
+        if (isset($data['thermostat_work']['fail'][0][1])) {
+            $command=array();
+            $command['SYSTEM']='fail';
+            $command['VALUE']=(int)$data['thermostat_work']['fail'][0][1];
+            $commands[]=$command;
+        }
+        if (isset($data['thermostat_work']['boiler_work_time'][0][1])) {
+            $command=array();
+            $command['SYSTEM']='boiler_work_time';
+            $command['VALUE']=(int)$data['thermostat_work']['boiler_work_time'][0][1];
+            $commands[]=$command;
+        }
+        if (isset($data['thermostat_work']['target_temp'][0][1])) {
+            $command=array();
+            $command['SYSTEM']='target_temp';
+            $command['VALUE']=(int)$data['thermostat_work']['target_temp'][0][1];
+            $commands[]=$command;
+        }
+        if (isset($data['thermostat_work']['pza_t'][0][1])) {
+            $command=array();
+            $command['SYSTEM']='pza_t';
+            $command['VALUE']=(int)$data['thermostat_work']['pza_t'][0][1];
+            $commands[]=$command;
+        }
+        $this->processCommandsArray($device_rec['ID'],$commands);
+    }
+
     function processDeviceData($data) {
         //dprint($data);
         $device_rec=SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='".DBSafe($data['id'])."'");
@@ -463,13 +505,18 @@ class zontdevices extends module
             $command['VALUE']=0;
         }
         $commands[]=$command;
+        $this->processCommandsArray($device_rec['ID'],$commands);
+        //dprint($commands);
+        //dprint($data);
+    }
 
+    function processCommandsArray($device_id,$commands) {
         foreach($commands as &$command) {
             if (!$command['SYSTEM']) continue;
             if (!$command['TITLE']) {
                 $command['TITLE']=$command['SYSTEM'];
             }
-            $command_rec=SQLSelectOne("SELECT * FROM zontcommands WHERE SYSTEM='".DBSafe($command['SYSTEM'])."' AND DEVICE_ID=".$device_rec['ID']);
+            $command_rec=SQLSelectOne("SELECT * FROM zontcommands WHERE SYSTEM='".DBSafe($command['SYSTEM'])."' AND DEVICE_ID=".$device_id);
             if (!$command['UPDATED'] && $command_rec['VALUE']!=$command['VALUE']) {
                 $command['UPDATED']=date('Y-m-d H:i:s');
             }
@@ -477,7 +524,7 @@ class zontdevices extends module
                 $command_rec[$k]=$v;
             }
             if (!$command_rec['ID']) {
-                $command_rec['DEVICE_ID']=$device_rec['ID'];
+                $command_rec['DEVICE_ID']=$device_id;
                 $command_rec['ID']=SQLInsert('zontcommands',$command_rec);
             } else {
                 SQLUpdate('zontcommands',$command_rec);
@@ -491,22 +538,41 @@ class zontdevices extends module
                 $params['VALUE']=$command_rec['VALUE'];
                 callMethod($command_rec['LINKED_OBJECT'].'.'.$command_rec['LINKED_METHOD'], $params);
             }
-
         }
-        //dprint($commands);
-        //dprint($data);
     }
 
     function refreshDevices() {
         $data=$this->requestZontAPI('/api/devices');
         if ($_GET['raw']) {
-            dprint($data);
+            dprint($data,false);
         }
         if (is_array($data['devices'])) {
-            //echo "Data: ".json_encode($data)."\n";
             $total = count($data['devices']);
-            for($i=0;$i<$total;$i++) {
-                $this->processDeviceData($data['devices'][$i]);
+            if ($total>0) {
+                $requests=array();
+                for($i=0;$i<$total;$i++) {
+                    $requests[]=array(
+                        'device_id'=>$data['devices'][$i]['id'],
+                        'data_types'=>array('thermostat_work'),
+                        'maxtime'=>$data['devices'][$i]['last_receive_time'],
+                        'mintime'=>$data['devices'][$i]['last_receive_time']-30*60,
+                        );
+                    if (!$_GET['raw']) {
+                        $this->processDeviceData($data['devices'][$i]);
+                    }
+                }
+                $items=array(
+                    'requests'=>$requests
+                );
+                $data=$this->requestZontAPI('/api/load_data',$items);
+                if (!$_GET['raw']) {
+                    $total=count($data['responses']);
+                    for($i=0;$i<$total;$i++) {
+                        $this->processDeviceDataResponse($data['responses'][$i]);
+                    }
+                } else {
+                    dprint($data);
+                }
             }
         } else {
             //echo "No data received: ".$data."\n";
