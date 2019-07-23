@@ -259,38 +259,20 @@ class zontdevices extends module
 
 
     function requestZontAPI($command,$data=0) {
+ $username=$this->config['API_USERNAME'];
+ $password=$this->config['API_PASSWORD'];
 
-        $username=$this->config['API_USERNAME'];
-        $password=$this->config['API_PASSWORD'];
+require_once 'Requests/Requests.php';
+Requests::register_autoloader();
 
-        $ch = curl_init('https://zont-online.ru'.$command);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        if (is_array($data)) {
-            $data_string = json_encode($data);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-        } else {
-            $data_string='';
-        }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);     // bad style, I know...
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-ZONT-Client: '.$username,
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data_string))
-        );
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
-        $result = curl_exec($ch);
+$url = 'https://zont-online.ru/api/devices';
+$data = array('load_io' => true);
 
-        if (curl_errno($ch) && !$background) {
-            //$errorInfo = curl_error($ch);
-            $info = curl_getinfo($ch);
-            dprint($info,false);
-        }
-        curl_close($ch);
-        $res=json_decode($result,true);
-        return $res;
+$headers = array('X-ZONT-Client' => $username, 'Content-Type' => 'application/json');
+$options = array('auth' => array($username, $password));
+$response = Requests::post($url, $headers, json_encode($data), $options);
+$res = json_decode($response->body, true);
+return $res;
 
     }
 
