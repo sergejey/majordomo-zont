@@ -453,6 +453,22 @@ class zontdevices extends module
                 $commands[]=$command;
             }
         }
+        
+                
+        if ($has['has_multiple_thermometers'] && is_array($data['z3k_config']['wired_temperature_sensors'])) {
+            foreach($data['z3k_config']['wired_temperature_sensors'] as $wired_term) {
+                $command=array();
+                $serial=str_replace('%','',$wired_term['serial']);
+                $id=$wired_term['id'];
+                $command['SYSTEM']=$serial.'_value';
+                $command['TITLE']=$wired_term['name'].', T';
+                $command['VALUE']=$data['io']['z3k-state'][$id]['curr_temp'];
+                $command['VALUE_TYPE']='temperature';
+                $commands[]=$command;
+            }
+        }
+        
+        
         if ($has['has_thermostat']) {
             if (isset($data['thermostat_mode'])) {
                 $command=array();
