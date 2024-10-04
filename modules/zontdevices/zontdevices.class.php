@@ -40,19 +40,19 @@ class zontdevices extends module
     function saveParams($data = 1)
     {
         $p = array();
-        if (IsSet($this->id)) {
+        if (isset($this->id)) {
             $p["id"] = $this->id;
         }
-        if (IsSet($this->view_mode)) {
+        if (isset($this->view_mode)) {
             $p["view_mode"] = $this->view_mode;
         }
-        if (IsSet($this->edit_mode)) {
+        if (isset($this->edit_mode)) {
             $p["edit_mode"] = $this->edit_mode;
         }
-        if (IsSet($this->data_source)) {
+        if (isset($this->data_source)) {
             $p["data_source"] = $this->data_source;
         }
-        if (IsSet($this->tab)) {
+        if (isset($this->tab)) {
             $p["tab"] = $this->tab;
         }
         return parent::saveParams($p);
@@ -109,10 +109,10 @@ class zontdevices extends module
         } else {
             $this->usual($out);
         }
-        if (IsSet($this->owner->action)) {
+        if (isset($this->owner->action)) {
             $out['PARENT_ACTION'] = $this->owner->action;
         }
-        if (IsSet($this->owner->name)) {
+        if (isset($this->owner->name)) {
             $out['PARENT_NAME'] = $this->owner->name;
         }
         $out['VIEW_MODE'] = $this->view_mode;
@@ -141,7 +141,7 @@ class zontdevices extends module
         if ($this->view_mode == 'update_settings') {
             $this->config['API_USERNAME'] = gr('api_username');
             $this->config['API_PASSWORD'] = gr('api_password');
-            $this->config['API_POLL'] = gr('api_poll','int');
+            $this->config['API_POLL'] = gr('api_poll', 'int');
             $this->saveConfig();
             $this->refreshDevices();
             setGlobal('cycle_zontdevicesControl', 'restart');
@@ -251,31 +251,32 @@ class zontdevices extends module
         if ($total) {
             for ($i = 0; $i < $total; $i++) {
                 //to-do
-                $device_record=SQLSelectOne("SELECT * FROM zontdevices WHERE ID=".$properties[$i]['DEVICE_ID']);
-                $this->writeDeviceCommand($device_record,$properties[$i],$value);
+                $device_record = SQLSelectOne("SELECT * FROM zontdevices WHERE ID=" . $properties[$i]['DEVICE_ID']);
+                $this->writeDeviceCommand($device_record, $properties[$i], $value);
             }
         }
     }
 
 
-    function requestZontAPI($command,$data=0) {
+    function requestZontAPI($command, $data = 0)
+    {
 
-        $username=$this->config['API_USERNAME'];
-        $password=$this->config['API_PASSWORD'];
+        $username = $this->config['API_USERNAME'];
+        $password = $this->config['API_PASSWORD'];
 
-        $ch = curl_init('https://zont-online.ru'.$command);
+        $ch = curl_init('https://zont-online.ru' . $command);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         if (is_array($data)) {
             $data_string = json_encode($data);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
         } else {
-            $data_string='';
+            $data_string = '';
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);     // bad style, I know...
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-ZONT-Client: '.$username,
+                'X-ZONT-Client: ' . $username,
                 'Content-Type: application/json',
                 'Content-Length: ' . strlen($data_string))
         );
@@ -286,288 +287,295 @@ class zontdevices extends module
         if (curl_errno($ch) && !$background) {
             //$errorInfo = curl_error($ch);
             $info = curl_getinfo($ch);
-            dprint($info,false);
+            dprint($info, false);
         }
         curl_close($ch);
-        $res=json_decode($result,true);
+        $res = json_decode($result, true);
         return $res;
 
     }
 
 
-    function processDeviceDataResponse($data) {
-        $device_rec=SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='".DBSafe($data['device_id'])."'");
+    function processDeviceDataResponse($data)
+    {
+        $device_rec = SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='" . DBSafe($data['device_id']) . "'");
         if (!$device_rec['ID']) {
-            $device_rec['SERIAL_ID']=$data['id'];
-            $device_rec['DEVICE_TYPE']=$data['device_type']['code'];
-            $device_rec['TITLE']=$data['device_type']['name'];
-            $device_rec['ID']=SQLInsert('zontdevices',$device_rec);
+            $device_rec['SERIAL_ID'] = $data['id'];
+            $device_rec['DEVICE_TYPE'] = $data['device_type']['code'];
+            $device_rec['TITLE'] = $data['device_type']['name'];
+            $device_rec['ID'] = SQLInsert('zontdevices', $device_rec);
         }
-        $commands=array();
+        $commands = array();
         if (isset($data['thermostat_work']['power'][0][1])) {
-            $command=array();
-            $command['SYSTEM']='power';
-            $command['VALUE']=$data['thermostat_work']['power'][0][1];
-            $commands[]=$command;
+            $command = array();
+            $command['SYSTEM'] = 'power';
+            $command['VALUE'] = $data['thermostat_work']['power'][0][1];
+            $commands[] = $command;
         }
         if (isset($data['thermostat_work']['fail'][0][1])) {
-            $command=array();
-            $command['SYSTEM']='fail';
-            $command['VALUE']=(int)$data['thermostat_work']['fail'][0][1];
-            $commands[]=$command;
+            $command = array();
+            $command['SYSTEM'] = 'fail';
+            $command['VALUE'] = (int)$data['thermostat_work']['fail'][0][1];
+            $commands[] = $command;
         }
         if (isset($data['thermostat_work']['boiler_work_time'][0][1])) {
-            $command=array();
-            $command['SYSTEM']='boiler_work_time';
-            $command['VALUE']=(int)$data['thermostat_work']['boiler_work_time'][0][1];
-            $commands[]=$command;
+            $command = array();
+            $command['SYSTEM'] = 'boiler_work_time';
+            $command['VALUE'] = (int)$data['thermostat_work']['boiler_work_time'][0][1];
+            $commands[] = $command;
         }
         if (isset($data['thermostat_work']['target_temp'][0][1])) {
-            $command=array();
-            $command['SYSTEM']='target_temp';
-            $command['VALUE']=(int)$data['thermostat_work']['target_temp'][0][1];
-            $commands[]=$command;
+            $command = array();
+            $command['SYSTEM'] = 'target_temp';
+            $command['VALUE'] = (int)$data['thermostat_work']['target_temp'][0][1];
+            $commands[] = $command;
         }
         if (isset($data['thermostat_work']['pza_t'][0][1])) {
-            $command=array();
-            $command['SYSTEM']='pza_t';
-            $command['VALUE']=(int)$data['thermostat_work']['pza_t'][0][1];
-            $commands[]=$command;
+            $command = array();
+            $command['SYSTEM'] = 'pza_t';
+            $command['VALUE'] = (int)$data['thermostat_work']['pza_t'][0][1];
+            $commands[] = $command;
         }
-        $this->processCommandsArray($device_rec['ID'],$commands);
+        $this->processCommandsArray($device_rec['ID'], $commands);
     }
 
-    function processDeviceData($data) {
+    function processDeviceData($data)
+    {
         //dprint($data);
-        $device_rec=SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='".DBSafe($data['id'])."'");
+        $device_rec = SQLSelectOne("SELECT * FROM zontdevices WHERE SERIAL_ID='" . DBSafe($data['id']) . "'");
         if (!$device_rec['ID']) {
-            $device_rec['SERIAL_ID']=$data['id'];
-            $device_rec['DEVICE_TYPE']=$data['device_type']['code'];
-            $device_rec['TITLE']=$data['device_type']['name'];
-            $device_rec['ID']=SQLInsert('zontdevices',$device_rec);
+            $device_rec['SERIAL_ID'] = $data['id'];
+            $device_rec['DEVICE_TYPE'] = $data['device_type']['code'];
+            $device_rec['TITLE'] = $data['device_type']['name'];
+            $device_rec['ID'] = SQLInsert('zontdevices', $device_rec);
         }
 
-        $commands=array();
-        $has=array();
-        foreach($data['capabilities'] as $feature) {
-            $has[$feature]=1;
+        $commands = array();
+        $has = array();
+        foreach ($data['capabilities'] as $feature) {
+            $has[$feature] = 1;
         }
         if ($has['has_gsm_balance'] && is_array($data['balance'])) {
-            $command=array();
-            $command['SYSTEM']='gsm_balance';
-            $command['VALUE']=$data['balance']['value'];
-            $commands[]=$command;
+            $command = array();
+            $command['SYSTEM'] = 'gsm_balance';
+            $command['VALUE'] = $data['balance']['value'];
+            $commands[] = $command;
         }
 
         if ($has['has_gtw_reports']) {
             if (isset($data['gtw_t_air_int_sensor'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_air_int_sensor';
-                $command['TITLE']='Int. air sensor, T';
-                $command['VALUE']=$data['gtw_t_air_int_sensor'];
-                $command['VALUE_TYPE']='temperature';
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_air_int_sensor';
+                $command['TITLE'] = 'Int. air sensor, T';
+                $command['VALUE'] = $data['gtw_t_air_int_sensor'];
+                $command['VALUE_TYPE'] = 'temperature';
+                $commands[] = $command;
             }
             if (isset($data['gtw_t_air_ext_sensor'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_air_ext_sensor';
-                $command['TITLE']='Ext. air sensor, T';
-                $command['VALUE']=$data['gtw_t_air_ext_sensor'];
-                $command['VALUE_TYPE']='temperature';
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_air_ext_sensor';
+                $command['TITLE'] = 'Ext. air sensor, T';
+                $command['VALUE'] = $data['gtw_t_air_ext_sensor'];
+                $command['VALUE_TYPE'] = 'temperature';
+                $commands[] = $command;
             }
             if (isset($data['gtw_t_water_sensor'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_water_sensor';
-                $command['TITLE']='Water sensor, T';
-                $command['VALUE']=$data['gtw_t_water_sensor'];
-                $command['VALUE_TYPE']='temperature';
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_water_sensor';
+                $command['TITLE'] = 'Water sensor, T';
+                $command['VALUE'] = $data['gtw_t_water_sensor'];
+                $command['VALUE_TYPE'] = 'temperature';
+                $commands[] = $command;
             }
             if (isset($data['gtw_t_air_set_disp'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_air_set_disp';
-                $command['TITLE']='Auto Air target, T';
-                $command['VALUE']=$data['gtw_t_air_set_disp'];
-                $command['VALUE_TYPE']='temperature';
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_air_set_disp';
+                $command['TITLE'] = 'Auto Air target, T';
+                $command['VALUE'] = $data['gtw_t_air_set_disp'];
+                $command['VALUE_TYPE'] = 'temperature';
+                $commands[] = $command;
             }
             if (isset($data['gtw_t_water_set_disp'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_water_set_disp';
-                $command['TITLE']='Auto Water target, T';
-                $command['VALUE']=$data['gtw_t_water_set_disp'];
-                $command['VALUE_TYPE']='temperature';
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_water_set_disp';
+                $command['TITLE'] = 'Auto Water target, T';
+                $command['VALUE'] = $data['gtw_t_water_set_disp'];
+                $command['VALUE_TYPE'] = 'temperature';
+                $commands[] = $command;
             }
             if (isset($data['gtw_p_water'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_p_water';
-                $command['TITLE']='Water pressure';
-                $command['VALUE']=$data['gtw_p_water'];
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_p_water';
+                $command['TITLE'] = 'Water pressure';
+                $command['VALUE'] = $data['gtw_p_water'];
+                $commands[] = $command;
             }
 
             if (isset($data['gtw_t_water'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_water';
-                $command['TITLE']='Water target';
-                $command['VALUE']=$data['gtw_t_water'];
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_water';
+                $command['TITLE'] = 'Water target';
+                $command['VALUE'] = $data['gtw_t_water'];
+                $commands[] = $command;
             }
             if (isset($data['gtw_t_air'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_t_air';
-                $command['TITLE']='Air target';
-                $command['VALUE']=$data['gtw_t_air'];
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_t_air';
+                $command['TITLE'] = 'Air target';
+                $command['VALUE'] = $data['gtw_t_air'];
+                $commands[] = $command;
             }
             if (isset($data['gtw_mode'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_mode';
-                $command['TITLE']='Mode';
-                $command['VALUE']=$data['gtw_mode']['current'];
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_mode';
+                $command['TITLE'] = 'Mode';
+                $command['VALUE'] = $data['gtw_mode']['current'];
+                $commands[] = $command;
             }
             if (isset($data['gtw_gvs'])) {
-                $command=array();
-                $command['SYSTEM']='gtw_gvs';
-                $command['TITLE']='Mode GVS';
-                $command['VALUE']=$data['gtw_gvs'];
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'gtw_gvs';
+                $command['TITLE'] = 'Mode GVS';
+                $command['VALUE'] = $data['gtw_gvs'];
+                $commands[] = $command;
             }
 
         }
 
         if ($has['has_multiple_thermometers'] && is_array($data['thermometers'])) {
-            foreach($data['thermometers'] as $term) {
-                $command=array();
-                $serial=str_replace('%','',$term['serial']);
-                $command['SYSTEM']=$serial.'_value';
-                $command['TITLE']=$term['name'].', T';
-                $command['VALUE']=$term['last_value'];
-                $command['VALUE_TYPE']='temperature';
-                if ($term['last_value_time']!='') {
-                    $command['UPDATED']=date('Y-m-d H:i:s',$term['last_value_time']);
+            foreach ($data['thermometers'] as $term) {
+                $command = array();
+                $serial = str_replace('%', '', $term['serial']);
+                $command['SYSTEM'] = $serial . '_value';
+                $command['TITLE'] = $term['name'] . ', T';
+                $command['VALUE'] = $term['last_value'];
+                $command['VALUE_TYPE'] = 'temperature';
+                if ($term['last_value_time'] != '') {
+                    $command['UPDATED'] = date('Y-m-d H:i:s', $term['last_value_time']);
                 }
-                $commands[]=$command;
+                $commands[] = $command;
             }
         }
         if ($has['has_thermostat']) {
             if (isset($data['thermostat_mode'])) {
-                $command=array();
-                $command['SYSTEM']='thermostat_mode';
-                $command['VALUE']=$data['thermostat_mode'];
-                $commands[]=$command;
+                $command = array();
+                $command['SYSTEM'] = 'thermostat_mode';
+                $command['VALUE'] = $data['thermostat_mode'];
+                $commands[] = $command;
             }
             if (isset($data['thermostat_ext_mode'])) {
-                $command=array();
-                $command['SYSTEM']='thermostat_ext_mode';
-                $command['VALUE']=$data['thermostat_ext_mode'];
+                $command = array();
+                $command['SYSTEM'] = 'thermostat_ext_mode';
+                $command['VALUE'] = $data['thermostat_ext_mode'];
                 if (is_array($data['thermostat_ext_modes_config'])) {
-                    $total_modes=count($data['thermostat_ext_modes_config']);
-                    for($im=0;$im<$total_modes;$im++) {
+                    $total_modes = count($data['thermostat_ext_modes_config']);
+                    for ($im = 0; $im < $total_modes; $im++) {
                         if (!$data['thermostat_ext_modes_config'][$im]['name']) continue;
-                        $command['COMMENTS'].=$im.' = '.$data['thermostat_ext_modes_config'][$im]['name'].'; ';
+                        $command['COMMENTS'] .= $im . ' = ' . $data['thermostat_ext_modes_config'][$im]['name'] . '; ';
                     }
                 }
-                $commands[]=$command;
+                $commands[] = $command;
             }
         }
         if (is_array($data['rf_status'])) {
-            foreach($data['rf_status'] as $k=>$v) {
-                $serial=preg_replace('/^s_/','',$k);
-                $serial=str_replace('%','',$serial);
+            foreach ($data['rf_status'] as $k => $v) {
+                $serial = preg_replace('/^s_/', '', $k);
+                $serial = str_replace('%', '', $serial);
                 if (isset($v['bat_v'])) {
-                    $command=array();
-                    $command['SYSTEM']=$serial.'_rf_batt_v';
-                    $command['TITLE']=$v['name'].', V';
-                    $command['VALUE']=$v['bat_v'];
-                    $commands[]=$command;
+                    $command = array();
+                    $command['SYSTEM'] = $serial . '_rf_batt_v';
+                    $command['TITLE'] = $v['name'] . ', V';
+                    $command['VALUE'] = $v['bat_v'];
+                    $commands[] = $command;
                 }
                 if (isset($v['dbm'])) {
-                    $command=array();
-                    $command['SYSTEM']=$serial.'_rf_dbm';
-                    $command['TITLE']=$v['name'].', Dbm';
-                    $command['VALUE']=$v['dbm'];
-                    $commands[]=$command;
+                    $command = array();
+                    $command['SYSTEM'] = $serial . '_rf_dbm';
+                    $command['TITLE'] = $v['name'] . ', Dbm';
+                    $command['VALUE'] = $v['dbm'];
+                    $commands[] = $command;
                 }
             }
         }
 
-        $command=array();
-        $command['SYSTEM']='online';
-        $command['TITLE']='Online';
+        $command = array();
+        $command['SYSTEM'] = 'online';
+        $command['TITLE'] = 'Online';
         //$command['UPDATED']=date('Y-m-d H:i:s');
         if ($data['online']) {
-            $command['VALUE']=1;
+            $command['VALUE'] = 1;
         } else {
-            $command['VALUE']=0;
+            $command['VALUE'] = 0;
         }
-        $commands[]=$command;
-        $this->processCommandsArray($device_rec['ID'],$commands);
+        $commands[] = $command;
+        $this->processCommandsArray($device_rec['ID'], $commands);
         //dprint($commands);
         //dprint($data);
     }
 
-    function processCommandsArray($device_id,$commands) {
-        foreach($commands as &$command) {
+    function processCommandsArray($device_id, $commands)
+    {
+        foreach ($commands as &$command) {
             if (!$command['SYSTEM']) continue;
             if (!$command['TITLE']) {
-                $command['TITLE']=$command['SYSTEM'];
+                $command['TITLE'] = $command['SYSTEM'];
             }
-            $command_rec=SQLSelectOne("SELECT * FROM zontcommands WHERE SYSTEM='".DBSafe($command['SYSTEM'])."' AND DEVICE_ID=".$device_id);
-            if (!$command['UPDATED'] && $command_rec['VALUE']!=$command['VALUE']) {
-                $command['UPDATED']=date('Y-m-d H:i:s');
+            $command_rec = SQLSelectOne("SELECT * FROM zontcommands WHERE SYSTEM='" . DBSafe($command['SYSTEM']) . "' AND DEVICE_ID=" . $device_id);
+            if (!$command['UPDATED'] && $command_rec['VALUE'] != $command['VALUE']) {
+                $command['UPDATED'] = date('Y-m-d H:i:s');
             }
-            foreach($command as $k=>$v) {
-                $command_rec[$k]=$v;
+            foreach ($command as $k => $v) {
+                $command_rec[$k] = $v;
             }
+
+            $command_rec['VALUE'] .= '';
+            
             if (!$command_rec['ID']) {
-                $command_rec['DEVICE_ID']=$device_id;
-                $command_rec['ID']=SQLInsert('zontcommands',$command_rec);
+                $command_rec['DEVICE_ID'] = $device_id;
+                $command_rec['ID'] = SQLInsert('zontcommands', $command_rec);
             } else {
-                SQLUpdate('zontcommands',$command_rec);
+                SQLUpdate('zontcommands', $command_rec);
             }
 
             if ($command_rec['LINKED_OBJECT'] && $command_rec['LINKED_PROPERTY']) {
-                setGlobal($command_rec['LINKED_OBJECT'].'.'.$command_rec['LINKED_PROPERTY'], $command_rec['VALUE'], array($this->name=>'0')); //
+                setGlobal($command_rec['LINKED_OBJECT'] . '.' . $command_rec['LINKED_PROPERTY'], $command_rec['VALUE'], array($this->name => '0')); //
             }
             if ($command_rec['LINKED_OBJECT'] && $command_rec['LINKED_METHOD']) {
-                $params=array();
-                $params['VALUE']=$command_rec['VALUE'];
-                callMethod($command_rec['LINKED_OBJECT'].'.'.$command_rec['LINKED_METHOD'], $params);
+                $params = array();
+                $params['VALUE'] = $command_rec['VALUE'];
+                callMethod($command_rec['LINKED_OBJECT'] . '.' . $command_rec['LINKED_METHOD'], $params);
             }
         }
     }
 
-    function refreshDevices() {
-        $data=$this->requestZontAPI('/api/devices');
+    function refreshDevices()
+    {
+        $data = $this->requestZontAPI('/api/devices');
         if ($_GET['raw']) {
-            dprint($data,false);
+            dprint($data, false);
         }
         if (is_array($data['devices'])) {
             $total = count($data['devices']);
-            if ($total>0) {
-                $requests=array();
-                for($i=0;$i<$total;$i++) {
-                    $requests[]=array(
-                        'device_id'=>$data['devices'][$i]['id'],
-                        'data_types'=>array('thermostat_work'),
-                        'maxtime'=>$data['devices'][$i]['last_receive_time'],
-                        'mintime'=>$data['devices'][$i]['last_receive_time']-30*60,
-                        );
+            if ($total > 0) {
+                $requests = array();
+                for ($i = 0; $i < $total; $i++) {
+                    $requests[] = array(
+                        'device_id' => $data['devices'][$i]['id'],
+                        'data_types' => array('thermostat_work'),
+                        'maxtime' => $data['devices'][$i]['last_receive_time'],
+                        'mintime' => $data['devices'][$i]['last_receive_time'] - 30 * 60,
+                    );
                     if (!$_GET['raw']) {
                         $this->processDeviceData($data['devices'][$i]);
                     }
                 }
-                $items=array(
-                    'requests'=>$requests
+                $items = array(
+                    'requests' => $requests
                 );
-                $data=$this->requestZontAPI('/api/load_data',$items);
+                $data = $this->requestZontAPI('/api/load_data', $items);
                 if (!$_GET['raw']) {
-                    $total=count($data['responses']);
-                    for($i=0;$i<$total;$i++) {
+                    $total = count($data['responses']);
+                    for ($i = 0; $i < $total; $i++) {
                         $this->processDeviceDataResponse($data['responses'][$i]);
                     }
                 } else {
@@ -583,16 +591,16 @@ class zontdevices extends module
     {
         $command = $this->device_types[$device_rec['DEVICE_TYPE']]['commands'][$command_rec['SYSTEM']];
         if ($command['CANSET']) {
-            $data=array();
-            $data['device_id']=$device_rec['SERIAL_ID'];
-            if ($command_rec['SYSTEM']=='gtw_mode') {
-                $data[$command_rec['SYSTEM']]['current']=$value;
-                $data[$command_rec['SYSTEM']]['old']=$value;
+            $data = array();
+            $data['device_id'] = $device_rec['SERIAL_ID'];
+            if ($command_rec['SYSTEM'] == 'gtw_mode') {
+                $data[$command_rec['SYSTEM']]['current'] = $value;
+                $data[$command_rec['SYSTEM']]['old'] = $value;
             } else {
-                $data[$command_rec['SYSTEM']]=$value;
+                $data[$command_rec['SYSTEM']] = $value;
             }
             //dprint($data);
-            $result = $this->requestZontAPI('/api/update_device',$data);
+            $result = $this->requestZontAPI('/api/update_device', $data);
             //dprint($result);
         }
     }
@@ -601,9 +609,9 @@ class zontdevices extends module
     function processCycle()
     {
         $this->getConfig();
-        $latest_iteration=(int)$this->cycle_time;
-        if ((time()-$latest_iteration)>$this->config['API_POLL']) {
-            $this->cycle_time=time();
+        $latest_iteration = (int)$this->cycle_time;
+        if ((time() - $latest_iteration) > $this->config['API_POLL']) {
+            $this->cycle_time = time();
             //echo date('H:i:s')." Refreshing devices\n";
             $this->refreshDevices();
         } else {
