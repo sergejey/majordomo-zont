@@ -64,12 +64,14 @@ $this->device_types = array(
     ),
 );
 
-foreach($this->device_types as $k=>$v) {
-    if ($v['copy']) {
-        foreach($v as $kv=>$vv) {
-            if (!isset($this->device_types[$k][$kv])) {
-                $this->device_types[$k][$kv]=$this->device_types[$v['copy']][$kv];
-            }
+// a device type may inherit missing settings from another one ('copy' => '<TYPE>')
+foreach ($this->device_types as $k => $v) {
+    if (empty($v['copy']) || !isset($this->device_types[$v['copy']])) {
+        continue;
+    }
+    foreach ($this->device_types[$v['copy']] as $kv => $vv) {
+        if (!isset($this->device_types[$k][$kv])) {
+            $this->device_types[$k][$kv] = $vv;
         }
     }
 }

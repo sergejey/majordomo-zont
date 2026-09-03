@@ -7,60 +7,62 @@
 <div class="alert alert-danger"><#LANG_FILLOUT_REQURED#></div>
 [#endif ERR#]
 
- <!--#
- <div>
- <a href="?id=<#ID#>&view_mode=<#VIEW_MODE#>&tab=<#TAB#>&refresh=1" class="btn btn-default"><#LANG_REFRESH#></a>
- </div>
- &nbsp;
- #-->
+<p>
+ <a href="?id=<#ID#>&view_mode=<#VIEW_MODE#>&tab=<#TAB#>&refresh=1" class="btn btn-default"><i class="glyphicon glyphicon-refresh"></i> <#LANG_REFRESH#></a>
+</p>
 
 <fieldset>
 <div class="form-group">
-<div>
-<table class="table table-stripped">
+<div class="table-responsive">
+<table class="table table-striped">
+ <thead>
  <tr>
-  <td>System</td>
-  <td><#LANG_TITLE#></td>
-  <td><#LANG_VALUE#></td>
-  <td><#LANG_DEVICE#></td>
-  <td><#LANG_LINKED_OBJECT#></td>
-  <td><#LANG_LINKED_PROPERTY#></td>
-  <td><#LANG_METHOD#></td>
-  <td valign="top"><#LANG_UPDATED#></td>
-  <td>&nbsp;</td>
+  <th>System</th>
+  <th><#LANG_TITLE#></th>
+  <th><#LANG_VALUE#></th>
+  <th><#LANG_DEVICE#></th>
+  <th><#LANG_LINKED_OBJECT#></th>
+  <th><#LANG_LINKED_PROPERTY#></th>
+  <th><#LANG_METHOD#></th>
+  <th><#LANG_UPDATED#></th>
+  <th>&nbsp;</th>
  </tr>
+ </thead>
+ <tbody>
  [#begin PROPERTIES#]
  <tr>
-  <td>[#SYSTEM#]</td>
+  <td valign="top">[#SYSTEM#]</td>
   <td valign="top">
    [#TITLE#]
    </td>
   <td valign="top">
    <span>[#VALUE#]</span>
-   [#if COMMENTS!=""#]<span title="[#COMMENTS#]">(?)</span>[#endif#]
+   [#if COMMENTS!=""#]<span class="text-muted" title="[#COMMENTS#]">(?)</span>[#endif#]
    [#if CANSET="1"#]
-   <a href="#" onclick="$('#p[#ID#]').show();return false;">SET</a>
+   <a href="#" onclick="$('#p[#ID#]').show();return false;"><#LANG_SET#></a>
    <span id="p[#ID#]" style="display:none">
-    <input type="text" name="set[#ID#]">
+    <input type="text" class="form-control input-sm" name="set[#ID#]"[#if COMMENTS!=""#] placeholder="[#COMMENTS#]"[#endif#]>
    </span>
    [#endif#]
   </td>
-  <td>
+  <td valign="top">
    [#if SDEVICE_TYPE!=""#]
    [#module name="devices" action="link" type="<#PROPERTIES.SDEVICE_TYPE#>" prefix="Zont" source_table="zontcommands" source_table_id="<#PROPERTIES.ID#>" linked_object="<#PROPERTIES.LINKED_OBJECT#>"#]
    [#else#]
    &nbsp;
    [#endif#]
   </td>
-  <td valign="top"><input type="text" name="linked_object[#ID#]" id="linked_object[#ID#]" value="[#LINKED_OBJECT#]"></td>
-  <td valign="top"><input type="text" name="linked_property[#ID#]" id="linked_property[#ID#]" value="[#LINKED_PROPERTY#]"></td>
-  <td valign="top"><input type="text" name="linked_method[#ID#]" id="linked_method[#ID#]" value="[#LINKED_METHOD#]"></td>
-  [#module name="linkedobject" object_field="linked_object<#PROPERTIES.ID#>" property_field="linked_property<#PROPERTIES.ID#>" method_field="linked_method<#PROPERTIES.ID#>" width="200"#]
-  <td valign="top">[#UPDATED#]</td>
-  <td><a href="?id=<#ID#>&tab=<#TAB#>&view_mode=<#VIEW_MODE#>&delete_id=[#ID#]" onClick="return confirm('<#LANG_ARE_YOU_SURE#>');" class="btn btn-default"><i class="glyphicon glyphicon-remove"></i></td>
+  <td valign="top"><input type="text" class="form-control input-sm" name="linked_object[#ID#]" id="linked_object[#ID#]" value="[#LINKED_OBJECT#]"></td>
+  <td valign="top"><input type="text" class="form-control input-sm" name="linked_property[#ID#]" id="linked_property[#ID#]" value="[#LINKED_PROPERTY#]"></td>
+  <td valign="top"><input type="text" class="form-control input-sm" name="linked_method[#ID#]" id="linked_method[#ID#]" value="[#LINKED_METHOD#]">
+   [#module name="linkedobject" object_field="linked_object<#PROPERTIES.ID#>" property_field="linked_property<#PROPERTIES.ID#>" method_field="linked_method<#PROPERTIES.ID#>" width="200"#]
+  </td>
+  <td valign="top" nowrap>[#UPDATED#]</td>
+  <td valign="top"><a href="?id=<#ID#>&tab=<#TAB#>&view_mode=<#VIEW_MODE#>&delete_id=[#ID#]" onClick="return confirm('<#LANG_ARE_YOU_SURE#>');" class="btn btn-default" title="<#LANG_DELETE#>"><i class="glyphicon glyphicon-remove"></i></a></td>
  </tr>
  [#end PROPERTIES#]
-</table> 
+ </tbody>
+</table>
 </div>
 </div>
 <div class="form-group">
