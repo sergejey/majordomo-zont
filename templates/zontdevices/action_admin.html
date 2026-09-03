@@ -1,31 +1,47 @@
+[#if API_ERROR!=""#]
+<div class="alert alert-danger">
+ <b>ZONT API:</b> [#API_ERROR#]
+</div>
+[#endif API_ERROR#]
+[#if NOT_CONFIGURED#]
+<div class="alert alert-info">
+ <#LANG_SETUP#>: API username / API password.
+</div>
+[#endif NOT_CONFIGURED#]
 <div>
  [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
 </div>
-<div style="display:none" id='api_settings'>
+<div[#if !NOT_CONFIGURED#] style="display:none"[#endif#] id='api_settings'>
 &nbsp;
 <form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
 <fieldset>
 <div class="form-group">
- <label class="control-label"[#if ERR_API_USERNAME#] style="color:red;font-weight:bold"[#endif#]>
+ <label class="control-label" for="api_username">
  API username:
  (*)
  </label>
- <div class="controls"><input type="text" name="api_username" value="[#API_USERNAME#]" class="input"></div>
+ <div class="controls"><input type="text" id="api_username" name="api_username" value="[#API_USERNAME#]" class="form-control" autocomplete="username"></div>
 </div>
     <div class="form-group">
-        <label class="control-label"[#if ERR_API_PASSWORD#] style="color:red;font-weight:bold"[#endif#]>
+        <label class="control-label" for="api_password">
             API password:
             (*)
         </label>
-        <div class="controls"><input type="password" name="api_password" value="[#API_PASSWORD#]" class="input"></div>
+        <div class="controls">
+            <input type="password" id="api_password" name="api_password" value="" class="form-control" autocomplete="new-password"[#if API_PASSWORD_SET="1"#] placeholder="**********"[#endif#]>
+            [#if API_PASSWORD_SET="1"#]<span class="help-block">Leave empty to keep the stored password</span>[#endif#]
+        </div>
     </div>
 
     <div class="form-group">
-        <label class="control-label">
+        <label class="control-label" for="api_poll">
             API polling period (seconds):
             (*)
         </label>
-        <div class="controls"><input type="text" name="api_poll" value="[#API_POLL#]" class="input"></div>
+        <div class="controls">
+            <input type="number" min="[#MIN_POLL#]" step="1" id="api_poll" name="api_poll" value="[#API_POLL#]" class="form-control">
+            <span class="help-block">Minimum [#MIN_POLL#] seconds, 60 is recommended</span>
+        </div>
     </div>
 
 <div class="form-actions">
@@ -49,7 +65,7 @@
    <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a>
   </li>
   <li[#if TAB="data"#] class="active"[#endif#]>
-   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data"><#LANG_DATA#></a>
   </li>
 </ul>
 &nbsp;<br/>
@@ -60,21 +76,5 @@
    [#if TAB="data"#]
     [#inc zontdevices_edit_data.html#]
    [#endif TAB#]
- [#endif VIEW_MODE#]
- [#if VIEW_MODE="view_zontdevices"#]
-   [#if TAB=""#]
-    [#inc zontdevices_view_default.html#]
-   [#endif TAB#]
- [#endif VIEW_MODE#]
- [#endif DATA_SOURCE#]
- [#if DATA_SOURCE="zontcommands"#]
- [#if VIEW_MODE="search_zontcommands" || VIEW_MODE=""#]
-  [#inc zontcommands_search_admin.html#]
- [#endif VIEW_MODE#]
- [#if VIEW_MODE="edit_zontcommands"#]
-   [#inc zontcommands_edit.html#]
- [#endif VIEW_MODE#]
- [#if VIEW_MODE="view_zontcommands"#]
-   [#inc zontcommands_view.html#]
  [#endif VIEW_MODE#]
  [#endif DATA_SOURCE#]
