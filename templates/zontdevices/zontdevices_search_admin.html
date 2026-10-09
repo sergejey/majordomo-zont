@@ -2,8 +2,6 @@
 <a href="?view_mode=refresh_zontdevices&data_source=<#DATA_SOURCE#>" class="btn btn-default"><i class="glyphicon glyphicon-refresh"></i> <#LANG_REFRESH#></a>
 <a href="?view_mode=refresh_zontdevices&data_source=<#DATA_SOURCE#>&raw=1" class="btn btn-default" target="_blank"><i class="glyphicon glyphicon-eye-open "></i> <#LANG_DATA#> API</a>
 </p>
-<table width=100% border=0><tr>
-<td valign=top>
 <!-- results -->
 [#if RESULT#]
 <!-- paging -->
@@ -22,15 +20,14 @@
 <!-- / paging -->
 <!-- search results (list) -->
 <form action="?" method="post" name="frmList_zontdevices" style="padding:0px" class="form">
-<table  align=center class="table table-striped">
+<div class="table-responsive">
+<table class="table table-striped">
  <thead>
  <tr>
-  <tr>
   <th>ID</th>
   <th><#LANG_TITLE#></th>
   <th><#LANG_UPDATED#></th>
   <th>&nbsp;</th>
- </tr>
  </tr>
  </thead>
 <tbody>
@@ -39,26 +36,27 @@
  <td>
   [#SERIAL_ID#]
  </td>
- <td
-  >
-  <b>
-   [#TITLE#]
-  </a></b><br/>[#DATA#]
- </td>
  <td>
-  [#if ONLINE="1"#]<font color="green">[#endif#]
-  [#UPDATED#]
+  <b>[#TITLE#]</b><br/>[#DATA#]
+ </td>
+ <td nowrap>
+  [#if ONLINE="1"#]
+  <span class="label label-success"><#LANG_ONLINE#></span>
+  [#else#]
+  <span class="label label-default"><#LANG_OFFLINE#></span>
+  [#endif#]
+  <br/>[#UPDATED#]
  </td>
 
  <td width="1%" nowrap>
   <div>
   [#if "<#ACTION#>"=="admin"#]
-   <a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_zontdevices&id=[#ID#]" class="btn btn-default" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>
-   <a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_zontdevices&id=[#ID#]&tab=data" class="btn btn-default" title="Edit"><i class="glyphicon glyphicon-th"></i></a>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_zontdevices&id=[#ID#]" class="btn btn-default" title="<#LANG_EDIT#>"><i class="glyphicon glyphicon-pencil"></i></a>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_zontdevices&id=[#ID#]&tab=data" class="btn btn-default" title="<#LANG_DATA#>"><i class="glyphicon glyphicon-th"></i></a>
    [#if MANUAL!=""#]
    <a href="[#MANUAL#]" class="btn btn-default" title="Manual" target="_blank"><i class="glyphicon glyphicon-question-sign"></i></a>
    [#endif#]
-   <a href="?data_source=<#DATA_SOURCE#>&view_mode=delete_zontdevices&id=[#ID#]" onClick="return confirm('Are you sure? Please confirm.')" class="btn btn-default" title="Delete"><i class="glyphicon glyphicon-remove"></i></a>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=delete_zontdevices&id=[#ID#]" onClick="return confirm('<#LANG_ARE_YOU_SURE#>');" class="btn btn-default" title="<#LANG_DELETE#>"><i class="glyphicon glyphicon-remove"></i></a>
   [#endif ACTION#]
   </div>
  </td>
@@ -66,6 +64,7 @@
 [#end RESULT#]
 </tbody>
 </table>
+</div>
 <input type="hidden" name="data_source" value="<#DATA_SOURCE#>">
 <input type="hidden" name="view_mode" value="multiple_zontdevices">
 </form>
@@ -86,9 +85,7 @@
 <!-- / paging -->
 [#else RESULT#]
 <p>
-<font color="red"><#LANG_NO_RECORDS_FOUND#></font>
+<span class="text-danger"><#LANG_NO_RECORDS_FOUND#></span>
 </p>
 [#endif RESULT#]
 <!-- / results -->
-</td></tr></table>
-
